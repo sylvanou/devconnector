@@ -1,32 +1,30 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const gravatar = require('gravatar');
-const bcrypt = require('bcryptjs');
-
+const gravatar = require("gravatar");
+const bcrypt = require("bcryptjs");
 
 // Load User Model
-const User = require('../../models/User');
+const User = require("../../models/User");
 
 // @route GET api/users/test
 // @desc Tests users route
 // @access Public
-router.get('/test', (req, res) => res.json({msg: "Users Works"}));
+router.get("/test", (req, res) => res.json({ msg: "Users Works" }));
 
 // @route GET api/users/register
 // @desc Registers users route
 // @access Public
-router.get('/register', (req, res) => {
-    User.findOne({ email: req.body.email })
+router.post("/register", (req, res) => {
+  User.findOne({ email: req.body.email })
     .then(user => {
-        if(user) {
-            return res.status(400).json({ email: 'Email already exists'})
-        }
-        else {
+        if (user) {
+        return res.status(400).json({ email: "Email already exists" });
+        } else {
             const avatar = gravatar.url(req.body.email, {
-                s: '200',  // Size
-                r: 'pg',  // Rating
-                d: 'mm'  // Default
-            })
+                s: "200", // Size
+                r: "pg", // Rating
+                d: "mm" // Default
+            });
             const newUser = new User({
                 name: req.body.name,
                 email: req.body.email,
@@ -34,16 +32,16 @@ router.get('/register', (req, res) => {
                 password: req.body.password
             });
             // Hash user password
-            bcrypt.getSalt(10, (err, salt) => {
+            bcrypt.genSalt(10, (err, salt) => {
                 bcrypt.hash(newUser.password, salt, (err, hash) => {
-                    if(err) throw err;
-                    newUser.password = hash;
-                    newUser
-                      .save()
-                      .then(user => res.json(user))
-                      .catch(err => console.log(err));
-                })
-            })
+                if (err) throw err;
+                newUser.password = hash;
+                newUser
+                    .save()
+                    .then(user => res.json(user))
+                    .catch(err => console.log(err));
+                });
+            });
         }
     });
 });
